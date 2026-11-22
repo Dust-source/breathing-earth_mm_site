@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>呼吸的地球 · 四种温室气体的四十年</title>
+<meta name="description" content="基于 NOAA GML 全球月均温室气体观测与 OWID 全球排放数据，交互式呈现 CO₂、CH₄、N₂O、SF₆ 四十年浓度变化及其生态学意义。">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav" id="nav">
+  <a href="#top" class="brand"><div class="brand-mark">碳</div><span>呼吸的地球</span></a>
+  <div class="nav-links">
+    <a href="#overview">气体概览</a>
+    <a href="#timeline">时间轴</a>
+    <a href="#dual">双轨图</a>
+    <a href="#amplitude">季节振幅</a>
+    <a href="#fraction">滞留比例</a>
+    <a href="#lab">碳汇实验室</a>
+    <a href="#source">数据来源</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero" id="top">
+  <img class="hero-bg" src="assets/img/mauna_loa.jpg" alt="夏威夷莫纳罗亚观测站">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow"><span class="dot"></span>NOAA GML · 1979 – 2026 · 全球观测</div>
+    <h1>呼吸的<em>地球</em></h1>
+    <p class="hero-sub">四种温室气体，四十年连续记录。这条曲线里藏着人类活动的印记，也藏着地球生态系统的呼吸、季节与临界。跟随时间轴，读懂大气正在经历的漫长变化。</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">47</div><div class="lab">年连续观测</div></div>
+      <div class="hero-stat"><div class="num">4</div><div class="lab">种关键气体</div></div>
+      <div class="hero-stat"><div class="num">+91</div><div class="lab">CO₂ 浓度变化 (ppm)</div></div>
+      <div class="hero-stat"><div class="num">≈50%</div><div class="lab">排放被自然消纳</div></div>
+    </div>
+    <button class="hero-btn" id="exploreBtn">开始探索 <span class="arrow">→</span></button>
+  </div>
+  <div class="scroll-hint"><div class="mouse"></div><span>向下滚动</span></div>
+</header>
+
+<!-- 气体概览 -->
+<section class="section" id="overview">
+  <div class="section-head reveal">
+    <span class="section-tag">01 · Four Gases</span>
+    <h2 class="section-title">四种气体，四种角色</h2>
+    <p class="section-desc">它们都在上升，但涨幅、来源与在大气中的寿命截然不同。点击卡片可在下方时间轴中切换查看。</p>
+  </div>
+  <div class="gas-grid" id="gasGrid"></div>
+
+  <div class="photo-strip">
+    <div class="photo reveal">
+      <img src="assets/img/mauna_loa.jpg" alt="莫纳罗亚观测站北坡">
+      <div class="cap"><strong>莫纳罗亚观测站，夏威夷</strong>自 1958 年起，这里的大气采样从未间断，诞生了著名的“基林曲线”。</div>
+    </div>
+    <div class="photo reveal">
+      <img src="assets/img/keeling_mlo.jpg" alt="Charles Keeling 与 John Chin 在观测站">
+      <div class="cap"><strong>查尔斯·基林（左）与 John Chin</strong>1997 年于莫纳罗亚。正是他开启了这场跨越半世纪的观测。</div>
+    </div>
+  </div>
+</section>
+
+<!-- 主时间轴 -->
+<section class="section" id="timeline" style="padding-top:20px">
+  <div class="viz-shell reveal">
+    <div class="viz-toolbar">
+      <div class="left">
+        <span class="viz-title">全球月均浓度时间轴</span>
+        <div class="toggle-group" id="gasToggle"></div>
+      </div>
+      <div class="legend-inline">
+        <span><i style="background:#2a8a5b"></i>月均观测</span>
+        <span><i style="background:#c9d6cd;height:2px"></i>长期趋势</span>
+        <span><i style="background:#d9a441"></i>事件标记</span>
+      </div>
+    </div>
+
+    <div class="chart-wrap" id="mainChartWrap">
+      <canvas id="mainChart" role="img" aria-label="四种温室气体全球月均浓度时间轴，含事件标记与基林论文气泡">温室气体浓度时间轴</canvas>
+      <div id="keelingBubble" class="keeling-bubble" title="查看 Keeling 1976 论文">
+        <div class="kb-dot">K</div>
+        <div class="kb-label">1976 · Keeling 论文</div>
+      </div>
+    </div>
+
+    <div class="event-axis" id="eventAxis">
+      <span class="event-axis-label">重大事件 · 点击查看详情</span>
+    </div>
+    <div class="axis-hint">
+      <span><i class="ev-A"></i>A 观测支持</span>
+      <span><i class="ev-B"></i>B 机制假说</span>
+      <span><i class="ev-C"></i>C 时间重合</span>
+    </div>
+  </div>
+</section>
+
+<!-- 双轨图 -->
+<section class="section" id="dual" style="padding-top:10px">
+  <div class="section-head reveal">
+    <span class="section-tag">02 · Emissions &amp; Concentration</span>
+    <h2 class="section-title">排放与浓度：一条积分曲线</h2>
+    <p class="section-desc">浓度是排放长年累积的结果。2020 年人类排放因疫情下降约 5%，大气 CO₂ 却仍在上升——这是理解碳循环最关键的一课。</p>
+  </div>
+  <div class="panel full reveal">
+    <div class="panel-head">
+      <div>
+        <h3>全球 CO₂ 排放 vs 大气浓度增量</h3>
+        <div class="p-desc">柱状为年度 fossil 排放（GtCO₂/年），曲线为大气 CO₂ 年增量。数据：OWID / Global Carbon Budget + NOAA GML。</div>
+      </div>
+      <div class="dual-controls">
+        <div class="seg" id="dualSeg">
+          <button data-mode="fossil" class="active">化石排放</button>
+          <button data-mode="incl">含土地利用</button>
+        </div>
+        <span class="p-badge">真实数据</span>
+      </div>
+    </div>
+    <div class="chart tall"><canvas id="dualChart" role="img" aria-label="全球CO2排放与大气浓度增量双轴对比图">排放与浓度双轨图</canvas></div>
+    <div class="insight"><div class="ic">💡</div><p><strong>为什么排放下降，浓度还在升？</strong> 大气是一个巨大的蓄水池。只要排放大于自然系统的吸收能力，浓度就会继续累积。要稳住浓度，排放需要降到与陆地和海洋碳汇相当的水平；要降低浓度，则需要净负排放。</p></div>
+  </div>
+</section>
+
+<!-- 季节振幅 & 滞留比例 -->
+<section class="section" id="amplitude" style="padding-top:10px">
+  <div class="section-head reveal">
+    <span class="section-tag">03 · Ecological Signals</span>
+    <h2 class="section-title">曲线里藏着的生态信号</h2>
+    <p class="section-desc">同样是上升曲线，季节振幅的变化反映北半球植被活动的增强；而排放被大气“截留”的比例，则揭示自然碳汇的命运。</p>
+  </div>
+  <div class="panel-grid">
+    <div class="panel reveal" id="ampPanel">
+      <div class="panel-head">
+        <div>
+          <h3>CO₂ 季节振幅趋势</h3>
+          <div class="p-desc">每年“月均浓度 − 长期趋势”的峰谷差，即生态系统呼吸与光合的季节摆动幅度。</div>
+        </div>
+        <span class="p-badge">数据可直接计算</span>
+      </div>
+      <div class="chart"><canvas id="ampChart" role="img" aria-label="CO2季节振幅逐年变化趋势图">季节振幅趋势</canvas></div>
+      <div class="insight"><div class="ic">🌿</div><p>振幅从 1979 年的约 <strong>3.98 ppm</strong> 增至近年的约 <strong>4.6 ppm</strong>。这与北半球生长季延长、植被碳吸收增强的推断一致——Keeling 早在 1976 年就注意到季节摆动在变大。</p></div>
+    </div>
+
+    <div class="panel reveal" id="fractionPanel">
+      <div class="panel-head">
+        <div>
+          <h3>大气滞留比例 (Airborne Fraction)</h3>
+          <div class="p-desc">每年排放的 CO₂ 中，有多少留在大气（大气增量 ÷ 排放）。其余被陆地与海洋碳汇吸收。</div>
+        </div>
+        <span class="p-badge">含 LUC 口径</span>
+      </div>
+      <div class="chart"><canvas id="afChart" role="img" aria-label="大气CO2滞留比例逐年变化图">大气滞留比例</canvas></div>
+      <div class="insight"><div class="ic">🌊</div><p>过去几十年，约 <strong>45%–50%</strong> 的排放留在大气，另一半被陆地与海洋消纳。这条比例是否长期上升，是判断碳汇是否趋于饱和的关键。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 碳汇实验室 -->
+<section class="section" id="lab" style="padding-top:10px">
+  <div class="section-head reveal">
+    <span class="section-tag">04 · Carbon Sink Lab</span>
+    <h2 class="section-title">碳汇实验室：一场光合与呼吸的拔河</h2>
+    <p class="section-desc">拖动温度、降水与 CO₂ 三个滑块，看陆地生态系统是继续吸碳，还是反过来向大气排碳。升温会同时推动两股力量：CO₂ 施肥让光合变强，而 Q10 效应让呼吸加速。谁跑得快，净碳汇就倒向谁。</p>
+  </div>
+
+  <div class="lab-shell reveal">
+    <div class="lab-grid">
+      <!-- 控制面板 -->
+      <div class="lab-controls">
+        <div class="lab-ctrl-head">
+          <span class="lab-ctrl-title">环境控制台</span>
+          <button class="lab-reset" id="labReset" title="回到当前状态">↺ 重置</button>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-top"><label for="labTemp">全球升温</label><span class="ctrl-val" id="labTempVal">+1.2 °C</span></div>
+          <input type="range" id="labTemp" min="0" max="5" step="0.1" value="1.2" class="lab-range">
+          <div class="ctrl-scale"><span>工业化前 0</span><span>当前 +1.2</span><span>+5 °C</span></div>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-top"><label for="labPrecip">降水变化</label><span class="ctrl-val" id="labPrecipVal">0 %</span></div>
+          <input type="range" id="labPrecip" min="-50" max="30" step="1" value="0" class="lab-range">
+          <div class="ctrl-scale"><span>干旱 −50%</span><span>正常</span><span>湿润 +30%</span></div>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl-top"><label for="labCO2">大气 CO₂ 浓度</label><span class="ctrl-val" id="labCO2Val">420 ppm</span></div>
+          <input type="range" id="labCO2" min="280" max="700" step="5" value="420" class="lab-range">
+          <div class="ctrl-scale"><span>280 工业化前</span><span>420 当前</span><span>700 ppm</span></div>
+        </div>
+
+        <div class="lab-presets">
+          <span class="preset-label">快速情景</span>
+          <div class="preset-btns">
+            <button data-preset="pre">工业化前</button>
+            <button data-preset="now" class="active">当前</button>
+            <button data-preset="two">+2°C 情景</button>
+            <button data-preset="hot">高排放 · 干旱</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 结果面板 -->
+      <div class="lab-result">
+        <div class="result-head">
+          <div>
+            <div class="result-kicker">净生态系统生产 NEP</div>
+            <div class="nep-number"><span id="nepValue">3.2</span><small>GtC / 年</small></div>
+          </div>
+          <div class="nep-badge sink" id="nepBadge"><span class="badge-dot"></span><span id="nepStatus">净碳汇</span></div>
+        </div>
+
+        <!-- 拔河对比条 -->
+        <div class="tug">
+          <div class="tug-row">
+            <div class="tug-label"><span class="tug-ico gpp"></span>光合吸收 <em>GPP</em></div>
+            <div class="tug-track"><div class="tug-fill gpp" id="gppBar"></div></div>
+            <div class="tug-num" id="gppVal">134</div>
+          </div>
+          <div class="tug-row">
+            <div class="tug-label"><span class="tug-ico resp"></span>呼吸释放 <em>R</em></div>
+            <div class="tug-track"><div class="tug-fill resp" id="respBar"></div></div>
+            <div class="tug-num" id="respVal">130</div>
+          </div>
+          <div class="tug-axis"><span>0</span><span>全球陆地碳通量（GtC / 年）</span></div>
+        </div>
+
+        <!-- 汇源指针 -->
+        <div class="balance">
+          <div class="balance-labels"><span class="src">← 净碳源</span><span class="sink">净碳汇 →</span></div>
+          <div class="balance-track">
+            <div class="balance-zero"></div>
+            <div class="balance-needle" id="balanceNeedle"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 温度响应曲线 -->
+    <div class="lab-chart-row">
+      <div class="lab-chart-head">
+        <div><strong>温度升高时，净碳汇怎么变</strong><span>固定当前 CO₂ 与降水，只改变温度</span></div>
+        <div class="lab-chart-legend"><span><i class="ln-curve"></i>NEP 响应曲线</span><span><i class="ln-dot"></i>当前设定</span></div>
+      </div>
+      <div class="lab-chart-wrap"><canvas id="labChart" role="img" aria-label="净生态系统生产随温度变化的响应曲线">温度响应曲线</canvas></div>
+    </div>
+
+    <!-- 动态解读 -->
+    <div class="lab-explain" id="labExplain"></div>
+
+    <div class="lab-disclaimer">
+      <strong>教学示意模型。</strong>数值为简化的机制演示，用于说明光合与呼吸对环境的相反响应，并非真实预测。GPP 以 CO₂ 对数施肥与温度最优曲线刻画，呼吸以 Q10≈2 的温度敏感性刻画，降水对两者做不同强度的调节。真实碳循环还受养分限制、植被类型、火灾与土地利用等影响。
+    </div>
+  </div>
+</section>
+
+<!-- Keeling 论文气泡说明 + 数据来源 -->
+<section class="source-section" id="source">
+  <div class="section-head reveal">
+    <span class="section-tag">05 · Sources &amp; Method</span>
+    <h2 class="section-title">数据从哪里来</h2>
+    <p class="section-desc">所有数字均来自公开权威数据集，可复核、可追溯。绿色气泡中嵌入了 1976 年那篇经典论文。</p>
+  </div>
+  <div class="source-grid">
+    <div class="source-card reveal"><div class="sc-icon">🌍</div><h4>NOAA GML 全球月均序列</h4><p>CO₂ 自 1979、CH₄ 自 1983、SF₆ 自 1997、N₂O 自 2001 年起。含月均值、趋势值与各自的不确定度。末段数据为初值，会随标准气重标定而修订。</p></div>
+    <div class="source-card reveal"><div class="sc-icon">📊</div><h4>Our World in Data / GCB</h4><p>全球化石燃料与土地利用 CO₂ 排放数据，用于排放/浓度双轨图与大气滞留比例计算。排放量单位由百万吨换算为 GtCO₂。</p></div>
+    <div class="source-card reveal"><div class="sc-icon">📄</div><h4>Keeling et al. 1976</h4><p><em>Atmospheric carbon dioxide variations at Mauna Loa Observatory, Hawaii.</em> Tellus。论文首页已嵌入绿色气泡，点击可查看原文摘录与 PDF 全文。</p></div>
+  </div>
+  <div class="source-note reveal">
+    <strong>方法说明：</strong>季节振幅 = 各年 12 个月「月均值 − 趋势值」的峰谷差；大气增量由相邻两年年均 CO₂ 之差乘以 7.82 GtCO₂/ppm 换算；大气滞留比例 = 大气增量 ÷ 排放（含土地利用口径）。事件按证据强度分为 A（有直接观测支持的增长率变化）、B（机制合理但贡献有争议）、C（仅时间重合）三级，点击时间轴上的标记可查看详情。<strong>请注意：</strong>时间重合不等于因果，作品对事件关联做了分级处理，避免将相关性误读为因果性。
+  </div>
+</section>
+
+<footer>
+  <div class="f-brand">呼吸的地球</div>
+  <div>基于 NOAA GML 与 OWID 公开数据制作 · 交互数据作品 · 2026</div>
+</footer>
+
+<!-- 事件详情弹层 -->
+<div class="event-detail" id="eventDetail">
+  <div class="event-box" id="eventBox">
+    <button class="event-close" id="eventClose">×</button>
+    <div class="ev-year" id="evYear"></div>
+    <div class="ev-level" id="evLevel"></div>
+    <h3 id="evTitle"></h3>
+    <p id="evDesc"></p>
+    <div class="ev-gas" id="evGas"></div>
+  </div>
+</div>
+
+<!-- 论文弹层 -->
+<div class="paper-modal" id="paperModal">
+  <div class="paper-inner">
+    <button class="paper-close" id="paperClose">×</button>
+    <div class="paper-text">
+      <div class="pt-tag">经典文献 · 1976</div>
+      <h2>大气二氧化碳的变化<br>来自夏威夷莫纳罗亚观测站</h2>
+      <div class="pt-author">Keeling, C. D. et al. · Tellus, 1976</div>
+      <p>这篇论文报告了莫纳罗亚观测站 1964–1971 年八年的连续 CO₂ 观测。结合更早的数据，作者指出 1959–1971 年间全球年均 CO₂ 浓度上升了约 3.4%。</p>
+      <div class="paper-quote">“The rate of rise, however, has not been steady. In the mid-1960's it declined. Recently it has accelerated.”<br>
+        <span style="font-family:var(--font-sans);font-size:13px;color:var(--ink-soft)">“然而上升速度并不平稳。1960 年代中期它曾放缓，最近又在加速。”</span></div>
+      <p>五十年前提出的“升速不稳”，在下方这条延续至今的曲线里得到了验证，并进一步演化为长期加速。论文还指出，季节振荡与长期上升是两个同时存在的独立信号——这正是本作品“季节振幅”与“浓度趋势”两条分析线的源头。</p>
+      <a class="paper-link" href="assets/pdf/keeling1976.pdf" target="_blank">查看论文 PDF <span>↗</span></a>
+    </div>
+    <div class="paper-img"><img src="assets/img/keeling1976.png" alt="Keeling 1976 论文首页"></div>
+  </div>
+</div>
+
+<script src="vendor/chart.umd.js"></script>
+<script src="data.js?v=2"></script>
+<script src="app.js?v=5"></script>
+</body>
+</html>
